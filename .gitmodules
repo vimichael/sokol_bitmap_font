@@ -1,0 +1,9 @@
+[submodule "vendor/sokol"]
+	path = vendor/sokol
+	url = https://github.com/floooh/sokol.git
+[submodule "vendor/sokol_gp"]
+	path = vendor/sokol_gp
+	url = https://github.com/edubart/sokol_gp.git
+[submodule "vendor/stb"]
+	path = vendor/stb
+	url = https://github.com/stb/stb.git
