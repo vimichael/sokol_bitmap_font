@@ -1,4 +1,3 @@
-#include "bitmap_font.h"
 #include "img.h"
 #include "sokol_app.h"
 #include "sokol_gfx.h"
@@ -10,6 +9,8 @@
 #include <string.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#define SOKOL_BITMAP_IMPL
+#include "sokol_bitmap_font.h"
 
 void hex_to_rgb(int hex, float *target) {
   (target)[0] = ((hex >> 24) & 0xFF) / 255.0; // A
@@ -43,7 +44,7 @@ void init() {
                                          .a = 1.0f,
                                      }}};
 
-  image_data_t img_data =
+  image_data img_data =
       load_img_data_from_file("../assets/font.png", IMAGE_FORMAT_PNG);
   sg_image img = load_img_from_data(img_data);
   stbi_image_free(img_data.data);
@@ -52,17 +53,18 @@ void init() {
                       "456789.,\"'?! _*#$%&()+-/:;<=>[\\]^`{|}/";
   size_t nchars = strlen(chars);
 
-  if (!bitmap_font_init(&state.font, (bitmap_desc){
-                                         .img = img,
-                                         .img_width_pixels = img_data.width,
-                                         .img_height_pixels = img_data.height,
-                                         .chars = chars,
-                                         .num_chars = nchars,
-                                         .char_padding_x_pixels = 1,
-                                         .char_padding_y_pixels = 0,
-                                         .char_width_pixels = 3,
-                                         .char_height_pixels = 5,
-                                     })) {
+  if (!bitmap_font_init(sbm_default_allocator(), &state.font,
+                        (bitmap_desc){
+                            .img = img,
+                            .img_width_pixels = img_data.width,
+                            .img_height_pixels = img_data.height,
+                            .chars = chars,
+                            .num_chars = nchars,
+                            .char_padding_x_pixels = 1,
+                            .char_padding_y_pixels = 0,
+                            .char_width_pixels = 3,
+                            .char_height_pixels = 5,
+                        })) {
     printf("failed to initialize bitmap font\n");
     exit(1);
   }
@@ -83,14 +85,19 @@ void frame(void) {
   sgp_set_image(0, state.font.opts.img);
   sgp_set_blend_mode(SGP_BLENDMODE_ADD);
 
-  const char *content = "int main() {\n\treturn 0;\n}";
+  const char *content = "BITMAP FONT IN C";
   size_t nchars = strlen(content);
-  bitmap_draw_lines(&state.font, content, nchars, 10.0f, 10.0f,
+  bitmap_draw_lines(&state.font,
+                    (sbm_string_slice){
+                        .items = content,
+                        .len = nchars,
+                    },
+                    25.0f, 25.0f,
                     (sgp_rect){
                         .x = 100.0f,
                         .y = 100.0f,
-                        .w = 30.0f,
-                        .h = 50.0f,
+                        .w = 75.0f,
+                        .h = 125.0f,
                     });
 
   sgp_flush();
