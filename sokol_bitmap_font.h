@@ -68,6 +68,9 @@ typedef struct sbm_font {
   uint32_t img_width_chars;
   uint32_t img_height_chars;
 
+  // the largest ascii val in the jump table
+  size_t max_ascii_val;
+
   size_t *char_jump_tbl;
 } sbm_font;
 
@@ -127,6 +130,7 @@ bool sbm_font_init(sbm_allocator allocator, sbm_font *self, sbm_desc opts) {
       (opts.char_height_pixels + opts.char_padding_y_pixels);
 
   size_t max_val = find_max(opts.chars, opts.num_chars);
+  self->max_ascii_val = max_val;
   size_t *tbl = allocator.alloc((max_val + 1) * sizeof(size_t), allocator.ctx);
   if (!tbl) {
     return false;
@@ -150,7 +154,7 @@ void sbm_font_free(sbm_font *self) {
 }
 
 void sbm_draw_char(sbm_font *self, char c, sgp_rect r) {
-  if (!self) {
+  if (!self || (size_t)c > self->max_ascii_val) {
     return;
   }
 
