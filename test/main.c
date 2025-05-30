@@ -21,7 +21,7 @@ void hex_to_rgb(int hex, float *target) {
 
 static struct {
   sg_pass_action action;
-  bitmap_font font;
+  sbm_font font;
 } state;
 
 void init() {
@@ -53,18 +53,18 @@ void init() {
                       "456789.,\"'?! _*#$%&()+-/:;<=>[\\]^`{|}/";
   size_t nchars = strlen(chars);
 
-  if (!bitmap_font_init(sbm_default_allocator(), &state.font,
-                        (bitmap_desc){
-                            .img = img,
-                            .img_width_pixels = img_data.width,
-                            .img_height_pixels = img_data.height,
-                            .chars = chars,
-                            .num_chars = nchars,
-                            .char_padding_x_pixels = 1,
-                            .char_padding_y_pixels = 0,
-                            .char_width_pixels = 3,
-                            .char_height_pixels = 5,
-                        })) {
+  if (!sbm_font_init(sbm_default_allocator(), &state.font,
+                     (sbm_desc){
+                         .img = img,
+                         .img_width_pixels = img_data.width,
+                         .img_height_pixels = img_data.height,
+                         .chars = chars,
+                         .num_chars = nchars,
+                         .char_padding_x_pixels = 1,
+                         .char_padding_y_pixels = 0,
+                         .char_width_pixels = 3,
+                         .char_height_pixels = 5,
+                     })) {
     printf("failed to initialize bitmap font\n");
     exit(1);
   }
@@ -87,18 +87,18 @@ void frame(void) {
 
   const char *content = "BITMAP FONT IN C";
   size_t nchars = strlen(content);
-  bitmap_draw_lines(&state.font,
-                    (sbm_string_slice){
-                        .items = content,
-                        .len = nchars,
-                    },
-                    25.0f, 25.0f,
-                    (sgp_rect){
-                        .x = 100.0f,
-                        .y = 100.0f,
-                        .w = 75.0f,
-                        .h = 125.0f,
-                    });
+  sbm_draw_lines(&state.font,
+                 (sbm_string_slice){
+                     .items = content,
+                     .len = nchars,
+                 },
+                 25.0f, 25.0f,
+                 (sgp_rect){
+                     .x = 100.0f,
+                     .y = 100.0f,
+                     .w = 75.0f,
+                     .h = 125.0f,
+                 });
 
   sgp_flush();
   sgp_end();
@@ -125,7 +125,7 @@ void event(const sapp_event *ev) {
 }
 
 void cleanup() {
-  bitmap_font_free(&state.font);
+  sbm_font_free(&state.font);
   sgp_shutdown();
   sg_shutdown();
 }

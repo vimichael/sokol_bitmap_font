@@ -1,5 +1,5 @@
-#ifndef BITMAP_FONT_H
-#define BITMAP_FONT_H
+#ifndef SOKOL_BITMAP_FONT_H
+#define SOKOL_BITMAP_FONT_H
 
 #include "sokol_gfx.h"
 #include "sokol_gp.h"
@@ -41,7 +41,7 @@ typedef struct sbm_string_slice {
   size_t len;
 } sbm_string_slice;
 
-typedef struct bitmap_desc {
+typedef struct sbm_desc {
   sg_image img;
 
   uint32_t img_width_pixels;
@@ -53,29 +53,29 @@ typedef struct bitmap_desc {
 
   const char *chars;
   size_t num_chars;
-} bitmap_desc;
+} sbm_desc;
 
-typedef struct bitmap_font {
+typedef struct sbm_font {
   sbm_allocator allocator;
 
-  bitmap_desc opts;
+  sbm_desc opts;
 
   uint32_t img_width_chars;
   uint32_t img_height_chars;
 
   size_t *char_jump_tbl;
-} bitmap_font;
+} sbm_font;
 
-extern bool bitmap_font_init(sbm_allocator allocator, bitmap_font *self,
-                             bitmap_desc opts);
-extern void bitmap_font_free(bitmap_font *self);
+extern bool sbm_font_init(sbm_allocator allocator, sbm_font *self,
+                          sbm_desc opts);
+extern void sbm_font_free(sbm_font *self);
 
-extern void bitmap_draw_char(bitmap_font *self, char c, sgp_rect r);
-extern void bitmap_draw_line(bitmap_font *self, sbm_string_slice slice,
-                             float gap, sgp_rect r);
+extern void sbm_draw_char(sbm_font *self, char c, sgp_rect r);
+extern void sbm_draw_line(sbm_font *self, sbm_string_slice slice, float gap,
+                          sgp_rect r);
 
-extern void bitmap_draw_lines(bitmap_font *self, sbm_string_slice slice,
-                              float gap_x, float gap_y, sgp_rect r);
+extern void sbm_draw_lines(sbm_font *self, sbm_string_slice slice, float gap_x,
+                           float gap_y, sgp_rect r);
 
 #if defined(SOKOL_BITMAP_IMPL) && !defined(SOKOL_BITMAP_IMPL_DONE)
 #define SOKOL_BITMAP_IMPL_DONE
@@ -106,8 +106,7 @@ bool build_char_jump_tbl(size_t *tbl, const char *chars, size_t num_chars) {
   return true;
 }
 
-bool bitmap_font_init(sbm_allocator allocator, bitmap_font *self,
-                      bitmap_desc opts) {
+bool sbm_font_init(sbm_allocator allocator, sbm_font *self, sbm_desc opts) {
   if (!self) {
     return false;
   }
@@ -136,14 +135,14 @@ bool bitmap_font_init(sbm_allocator allocator, bitmap_font *self,
   return true;
 }
 
-void bitmap_font_free(bitmap_font *self) {
+void sbm_font_free(sbm_font *self) {
   if (self && self->char_jump_tbl) {
     self->allocator.free(self->char_jump_tbl, self->allocator.ctx);
     self->char_jump_tbl = NULL;
   }
 }
 
-void bitmap_draw_char(bitmap_font *self, char c, sgp_rect r) {
+void sbm_draw_char(sbm_font *self, char c, sgp_rect r) {
   if (!self) {
     return;
   }
@@ -166,21 +165,21 @@ void bitmap_draw_char(bitmap_font *self, char c, sgp_rect r) {
                          });
 }
 
-void bitmap_draw_line(bitmap_font *self, sbm_string_slice slice, float gap,
-                      sgp_rect r) {
+void sbm_draw_line(sbm_font *self, sbm_string_slice slice, float gap,
+                   sgp_rect r) {
   for (size_t i = 0; i < slice.len; i++) {
-    bitmap_draw_char(self, slice.items[i],
-                     (sgp_rect){
-                         .x = r.x + (i * (r.w + gap)),
-                         .y = r.y,
-                         .w = r.w,
-                         .h = r.h,
-                     });
+    sbm_draw_char(self, slice.items[i],
+                  (sgp_rect){
+                      .x = r.x + (i * (r.w + gap)),
+                      .y = r.y,
+                      .w = r.w,
+                      .h = r.h,
+                  });
   }
 }
 
-void bitmap_draw_lines(bitmap_font *self, sbm_string_slice slice, float gap_x,
-                       float gap_y, sgp_rect r) {
+void sbm_draw_lines(sbm_font *self, sbm_string_slice slice, float gap_x,
+                    float gap_y, sgp_rect r) {
 
   float x = r.x;
   float y = r.y;
@@ -198,13 +197,13 @@ void bitmap_draw_lines(bitmap_font *self, sbm_string_slice slice, float gap_x,
       break;
     }
 
-    bitmap_draw_char(self, slice.items[i],
-                     (sgp_rect){
-                         .x = x,
-                         .y = y,
-                         .w = r.w,
-                         .h = r.h,
-                     });
+    sbm_draw_char(self, slice.items[i],
+                  (sgp_rect){
+                      .x = x,
+                      .y = y,
+                      .w = r.w,
+                      .h = r.h,
+                  });
 
     x += r.w + gap_x;
   }
