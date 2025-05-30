@@ -28,9 +28,10 @@ void init() {
   size_t nchars = strlen(chars);
 
   // initialize font
-  if (!bitmap_font_init(sbm_default_allocator(), &state.font,
-                        (bitmap_desc){
+  if (!sbm_font_init(sbm_default_allocator(), &state.font,
+                        (sbm_desc){
                             .img = img,
+                            .img_channel = 0,
                             .img_width_pixels = img_data.width,
                             .img_height_pixels = img_data.height,
                             .chars = chars,
@@ -39,6 +40,8 @@ void init() {
                             .char_padding_y_pixels = 0,
                             .char_width_pixels = 3,
                             .char_height_pixels = 5,
+                           .img_outer_padding_x = 0,
+                           .img_outer_padding_y = 0,
                         })) {
     printf("failed to initialize bitmap font\n");
     exit(1);
@@ -59,7 +62,7 @@ void frame(void) {
 
   const char *content = "BITMAP FONT IN C";
   size_t nchars = strlen(content);
-  bitmap_draw_lines(&state.font,
+  sbm_draw_lines(&state.font,
                     (sbm_string_slice){
                         .items = content,
                         .len = nchars,
