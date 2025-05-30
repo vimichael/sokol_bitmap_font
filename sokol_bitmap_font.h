@@ -43,9 +43,14 @@ typedef struct sbm_string_slice {
 
 typedef struct sbm_desc {
   sg_image img;
+  int img_channel;
 
   uint32_t img_width_pixels;
   uint32_t img_height_pixels;
+  // the padding surrounding the chars
+  // not the padding between the chars
+  uint32_t img_outer_padding_x;
+  uint32_t img_outer_padding_y;
   uint32_t char_width_pixels;
   uint32_t char_height_pixels;
   uint32_t char_padding_x_pixels;
@@ -113,10 +118,12 @@ bool sbm_font_init(sbm_allocator allocator, sbm_font *self, sbm_desc opts) {
 
   self->allocator = allocator;
   self->opts = opts;
-  self->img_width_chars = (opts.img_width_pixels + opts.char_padding_x_pixels) /
+  self->img_width_chars = (opts.img_width_pixels + opts.char_padding_x_pixels -
+                           (opts.img_outer_padding_x * 2)) /
                           (opts.char_width_pixels + opts.char_padding_x_pixels);
   self->img_height_chars =
-      (opts.img_height_pixels + opts.char_padding_y_pixels) /
+      (opts.img_height_pixels + opts.char_padding_y_pixels -
+       (opts.img_outer_padding_y * 2)) /
       (opts.char_height_pixels + opts.char_padding_y_pixels);
 
   size_t max_val = find_max(opts.chars, opts.num_chars);
@@ -152,11 +159,13 @@ void sbm_draw_char(sbm_font *self, char c, sgp_rect r) {
   uint32_t x_tiles = index % self->img_width_chars;
   uint32_t y_tiles = index / self->img_width_chars;
   uint32_t x_pixels = x_tiles * (self->opts.char_width_pixels +
-                                 self->opts.char_padding_x_pixels);
+                                 self->opts.char_padding_x_pixels) +
+                      self->opts.img_outer_padding_x;
   uint32_t y_pixels = y_tiles * (self->opts.char_width_pixels +
-                                 self->opts.char_padding_x_pixels);
+                                 self->opts.char_padding_x_pixels) +
+                      self->opts.img_outer_padding_y;
 
-  sgp_draw_textured_rect(0, r,
+  sgp_draw_textured_rect(self->opts.img_channel, r,
                          (sgp_rect){
                              .x = x_pixels,
                              .y = y_pixels,
