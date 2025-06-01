@@ -12,29 +12,10 @@ typedef struct sbm_allocator {
   void *ctx;
 } sbm_allocator;
 
-void *sbm_alloc(size_t n, void *ctx) {
-  (void)ctx;
-  return malloc(n);
-}
-
-void *sbm_realloc(void *mem, size_t n, void *ctx) {
-  (void)ctx;
-  return realloc(mem, n);
-}
-
-void sbm_free(void *mem, void *ctx) {
-  (void)ctx;
-  free(mem);
-}
-
-sbm_allocator sbm_default_allocator() {
-  return (sbm_allocator){
-      .alloc = sbm_alloc,
-      .realloc = sbm_realloc,
-      .free = sbm_free,
-      .ctx = NULL,
-  };
-}
+extern sbm_allocator sbm_default_allocator();
+extern void *sbm_alloc(size_t n, void *ctx);
+extern void *sbm_realloc(void *mem, size_t n, void *ctx);
+extern void sbm_free(void *mem, void *ctx);
 
 typedef struct sbm_string_slice {
   const char *items;
@@ -87,6 +68,30 @@ extern void sbm_draw_lines(sbm_font *self, sbm_string_slice slice, float gap_x,
 
 #if defined(SOKOL_BITMAP_IMPL) && !defined(SOKOL_BITMAP_IMPL_DONE)
 #define SOKOL_BITMAP_IMPL_DONE
+
+void *sbm_alloc(size_t n, void *ctx) {
+  (void)ctx;
+  return malloc(n);
+}
+
+void *sbm_realloc(void *mem, size_t n, void *ctx) {
+  (void)ctx;
+  return realloc(mem, n);
+}
+
+void sbm_free(void *mem, void *ctx) {
+  (void)ctx;
+  free(mem);
+}
+
+sbm_allocator sbm_default_allocator() {
+  return (sbm_allocator){
+      .alloc = sbm_alloc,
+      .realloc = sbm_realloc,
+      .free = sbm_free,
+      .ctx = NULL,
+  };
+}
 
 size_t find_max(const char *chars, size_t num_chars) {
   if (num_chars == 0) {
