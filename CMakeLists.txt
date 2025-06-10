@@ -24,7 +24,7 @@ set(STB_DIR ${CMAKE_SOURCE_DIR}/vendor/stb)
 
 # mac build
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
-    add_library(sokol STATIC ${CMAKE_SOURCE_DIR}/sokol.c ${SOKOL_HEADERS})
+    add_library(sokol STATIC ${CMAKE_SOURCE_DIR}/test/sokol.c ${SOKOL_HEADERS})
     target_include_directories(sokol PRIVATE ${SOKOL_SRC_DIR} ${SOKOL_GP_DIR})
     target_compile_options(sokol PRIVATE -x objective-c)
     target_link_libraries(sokol PUBLIC
@@ -35,7 +35,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
 else()
 
 # linux build
-    add_library(sokol STATIC ${CMAKE_SOURCE_DIR}/sokol.c ${SOKOL_HEADERS})
+    add_library(sokol STATIC ${CMAKE_SOURCE_DIR}/test/sokol.c ${SOKOL_HEADERS})
     target_include_directories(sokol PRIVATE ${SOKOL_SRC_DIR} ${SOKOL_GP_DIR} ${CMAKE_SOURCE_DIR})
     if (CMAKE_SYSTEM_NAME STREQUAL Linux)
         target_link_libraries(sokol INTERFACE X11 Xi Xcursor GL dl m)
