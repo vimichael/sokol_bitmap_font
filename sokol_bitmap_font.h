@@ -3,6 +3,7 @@
 
 #include "sokol_gfx.h"
 #include "sokol_gp.h"
+#include <stdint.h>
 #include <stdlib.h>
 
 typedef struct sbm_allocator {
@@ -11,11 +12,6 @@ typedef struct sbm_allocator {
   void (*free)(void *, void *);
   void *ctx;
 } sbm_allocator;
-
-extern sbm_allocator sbm_default_allocator();
-extern void *sbm_alloc(size_t n, void *ctx);
-extern void *sbm_realloc(void *mem, size_t n, void *ctx);
-extern void sbm_free(void *mem, void *ctx);
 
 typedef struct sbm_string_slice {
   const char *items;
@@ -55,16 +51,24 @@ typedef struct sbm_font {
   size_t *char_jump_tbl;
 } sbm_font;
 
+extern bool build_char_jump_tbl(size_t *tbl, const char *chars,
+                                size_t num_chars);
 extern bool sbm_font_init(sbm_allocator allocator, sbm_font *self,
                           sbm_desc opts);
-extern void sbm_font_free(sbm_font *self);
-
+extern sbm_allocator sbm_default_allocator();
+extern sgp_rect sbm_measure_line(sbm_font *self, sbm_string_slice slice,
+                                 float spacing, sgp_rect char_bounds);
+extern size_t find_max(const char *chars, size_t num_chars);
+extern void *sbm_alloc(size_t n, void *ctx);
+extern void *sbm_realloc(void *mem, size_t n, void *ctx);
 extern void sbm_draw_char(sbm_font *self, char c, sgp_rect r);
 extern void sbm_draw_line(sbm_font *self, sbm_string_slice slice, float gap,
                           sgp_rect r);
-
 extern void sbm_draw_lines(sbm_font *self, sbm_string_slice slice, float gap_x,
                            float gap_y, sgp_rect r);
+extern void sbm_font_free(sbm_font *self);
+extern void sbm_free(void *mem, void *ctx);
+extern void sbm_prepare(sbm_font *self);
 
 #if defined(SOKOL_BITMAP_IMPL) && !defined(SOKOL_BITMAP_IMPL_DONE)
 #define SOKOL_BITMAP_IMPL_DONE
@@ -90,6 +94,20 @@ sbm_allocator sbm_default_allocator() {
       .realloc = sbm_realloc,
       .free = sbm_free,
       .ctx = NULL,
+  };
+}
+
+void sbm_prepare(sbm_font *self) {
+  sgp_set_image(self->opts.img_channel, self->opts.img);
+}
+
+sgp_rect sbm_measure_line(sbm_font *self, sbm_string_slice slice, float spacing,
+                          sgp_rect char_bounds) {
+  return (sgp_rect){
+      .x = char_bounds.x,
+      .y = char_bounds.y,
+      .w = slice.len * char_bounds.w + (slice.len - 1) * spacing,
+      .h = char_bounds.h,
   };
 }
 
